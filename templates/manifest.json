@@ -1,0 +1,16 @@
+{
+  "name": "FishMoon — Рыбацкий помощник",
+  "short_name": "FishMoon",
+  "description": "Прогноз клёва по Луне и погоде",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0ea5e9",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 192 192%22><text y=%22.9em%22 font-size=%22160%22>🎣</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}

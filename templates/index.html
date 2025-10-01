@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>🎣 Рыбацкий помощник</title>
+    
+    <!-- PWA: встроенная иконка -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎣</text></svg>">
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#0ea5e9">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 192 192%22><text y=%22.9em%22 font-size=%22160%22>🎣</text></svg>">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container {
+            max-width: 768px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+        header {
+            background: #0ea5e9;
+            color: white;
+            padding: 24px;
+            text-align: center;
+        }
+        header h1 {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .form-section {
+            padding: 24px;
+        }
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            flex: 1;
+            min-width: 250px;
+        }
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #334155;
+        }
+        input[type="date"] {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 16px;
+            background: white;
+            color: #1e293b;
+        }
+        input[type="date"]:focus {
+            outline: none;
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+        }
+
+        select {
+            width: 100%;
+            padding: 12px 36px 12px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 16px;
+            color: #1e293b;
+            background-color: white;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20' stroke='%233498db'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4' /%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 14px;
+        }
+        select:focus {
+            outline: none;
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+        }
+        select::-ms-expand {
+            display: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #0ea5e9;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #0284c7;
+        }
+
+        .result-section {
+            padding: 0 24px 24px;
+        }
+        .location {
+            text-align: center;
+            margin-bottom: 24px;
+            font-size: 18px;
+            color: #0f172a;
+            font-weight: 600;
+        }
+        .summary {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        .summary h2 {
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: #0c4a6e;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 15px;
+        }
+        .summary-label {
+            color: #475569;
+        }
+        .summary-value {
+            font-weight: 600;
+            color: #0f172a;
+        }
+        .advice {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #bae6fd;
+            text-align: center;
+            font-weight: 700;
+            font-size: 17px;
+        }
+
+        .toggle-btn {
+            width: 100%;
+            padding: 12px;
+            background: #dbeafe;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .toggle-btn:hover {
+            background: #bfdbfe;
+        }
+
+        .period {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 16px;
+            display: none;
+        }
+        .period.visible {
+            display: block;
+        }
+        .period-title {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            color: #1e3a8a;
+        }
+        .period-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        .period-item {
+            font-size: 14px;
+        }
+        .period-label {
+            color: #64748b;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .period-value {
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .period-advice {
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                flex-direction: column;
+                gap: 16px;
+            }
+            .period-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎣 Рыбацкий помощник</h1>
+        </header>
+
+        <div class="form-section">
+            <form action="/" method="get">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="city">🏙 Город</label>
+                        <select id="city" name="city" required>
+                            <option value="Moscow" {% if city == 'Moscow' %}selected{% endif %}>Москва</option>
+                            <option value="Saint Petersburg" {% if city == 'Saint Petersburg' %}selected{% endif %}>Санкт-Петербург</option>
+                            <option value="Kazan" {% if city == 'Kazan' %}selected{% endif %}>Казань</option>
+                            <option value="Novosibirsk" {% if city == 'Novosibirsk' %}selected{% endif %}>Новосибирск</option>
+                            <option value="Ekaterinburg" {% if city == 'Ekaterinburg' %}selected{% endif %}>Екатеринбург</option>
+                            <option value="Rostov-on-Don" {% if city == 'Rostov-on-Don' %}selected{% endif %}>Ростов-на-Дону</option>
+                            <option value="Sochi" {% if city == 'Sochi' %}selected{% endif %}>Сочи</option>
+                            <option value="Krasnodar" {% if city == 'Krasnodar' %}selected{% endif %}>Краснодар</option>
+                            <option value="Vladivostok" {% if city == 'Vladivostok' %}selected{% endif %}>Владивосток</option>
+                            <option value="Kaliningrad" {% if city == 'Kaliningrad' %}selected{% endif %}>Калининград</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="date">📅 Дата</label>
+                        <input type="date" id="date" name="date" value="{{ date }}" required>
+                    </div>
+                </div>
+                <button type="submit">Получить совет</button>
+            </form>
+        </div>
+
+        {% if city %}
+        <div class="result-section">
+            <div class="location">
+                📍 Прогноз для: 
+                <strong>
+                {% if city == 'Moscow' %}Москва
+                {% elif city == 'Saint Petersburg' %}Санкт-Петербург
+                {% elif city == 'Kazan' %}Казань
+                {% elif city == 'Novosibirsk' %}Новосибирск
+                {% elif city == 'Ekaterinburg' %}Екатеринбург
+                {% elif city == 'Rostov-on-Don' %}Ростов-на-Дону
+                {% elif city == 'Sochi' %}Сочи
+                {% elif city == 'Krasnodar' %}Краснодар
+                {% elif city == 'Vladivostok' %}Владивосток
+                {% elif city == 'Kaliningrad' %}Калининград
+                {% else %}{{ city }}
+                {% endif %}
+                </strong>
+            </div>
+
+            {% if advice_blocks %}
+            <div class="summary">
+                <h2>🌤 Краткий прогноз на {{ date }}</h2>
+                <div class="summary-row">
+                    <span class="summary-label">🌙 Фаза Луны</span>
+                    <span class="summary-value">{{ advice_blocks[0].moon_phase }}</span>
+                </div>
+
+                {% set total_temp = namespace(value=0) %}
+                {% for block in advice_blocks %}
+                    {% set total_temp.value = total_temp.value + block.temp.replace('°C', '')|float %}
+                {% endfor %}
+                <div class="summary-row">
+                    <span class="summary-label">🌡 Температура</span>
+                    <span class="summary-value">~{{ (total_temp.value / advice_blocks|length)|round(1) }}°C</span>
+                </div>
+
+                {% set total_wind = namespace(value=0) %}
+                {% for block in advice_blocks %}
+                    {% set total_wind.value = total_wind.value + block.wind.replace(' м/с', '')|float %}
+                {% endfor %}
+                <div class="summary-row">
+                    <span class="summary-label">💨 Ветер</span>
+                    <span class="summary-value">~{{ (total_wind.value / advice_blocks|length)|round(1) }} м/с</span>
+                </div>
+
+                {% set total_rain = namespace(value=0) %}
+                {% for block in advice_blocks %}
+                    {% set total_rain.value = total_rain.value + block.rain.replace(' мм', '')|float %}
+                {% endfor %}
+                <div class="summary-row">
+                    <span class="summary-label">🌧 Осадки</span>
+                    <span class="summary-value">~{{ total_rain.value|round(1) }} мм</span>
+                </div>
+
+                <div class="summary-row">
+                    <span class="summary-label">📊 Средняя оценка клёва</span>
+                    <span class="summary-value">{{ avg_score|round(1) }}/10</span>
+                </div>
+
+                <div class="advice" style="color: {% if avg_score >= 9 %}#059669{% elif avg_score >= 7 %}#059669{% elif avg_score >= 5 %}#2563eb{% elif avg_score >= 3 %}#d97706{% else %}#dc2626{% endif %};">
+                    {{ summary_advice }}
+                </div>
+            </div>
+
+            <button id="toggleDetails" class="toggle-btn">📊 Показать подробный прогноз</button>
+
+            {% for block in advice_blocks %}
+            <div class="period">
+                <div class="period-title">{{ block.period }}</div>
+                <div class="period-grid">
+                    <div class="period-item">
+                        <span class="period-label">Луна</span>
+                        <span class="period-value">{{ block.moon_phase }}</span>
+                    </div>
+                    <div class="period-item">
+                        <span class="period-label">Температура</span>
+                        <span class="period-value">{{ block.temp }}</span>
+                    </div>
+                    <div class="period-item">
+                        <span class="period-label">Ветер</span>
+                        <span class="period-value">{{ block.wind }}</span>
+                    </div>
+                    <div class="period-item">
+                        <span class="period-label">Осадки</span>
+                        <span class="period-value">{{ block.rain }}</span>
+                    </div>
+                    <div class="period-item">
+                        <span class="period-label">Влажность</span>
+                        <span class="period-value">{{ block.humidity }}</span>
+                    </div>
+                </div>
+                <div class="period-advice" style="color: {% if block.score >= 9 %}#059669{% elif block.score >= 7 %}#059669{% elif block.score >= 5 %}#2563eb{% elif block.score >= 3 %}#d97706{% else %}#dc2626{% endif %};">
+                    {{ block.advice }} ({{ block.score }}/10)
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        const toggleBtn = document.getElementById('toggleDetails');
+        const periods = document.querySelectorAll('.period');
+
+        if (toggleBtn && periods.length > 0) {
+            toggleBtn.addEventListener('click', () => {
+                const isVisible = periods[0].classList.contains('visible');
+                periods.forEach(p => p.classList.toggle('visible', !isVisible));
+                toggleBtn.textContent = isVisible 
+                    ? '📊 Показать подробный прогноз'
+                    : '📌 Скрыть подробный прогноз';
+            });
+        }
+
+        // Сброс даты при смене города
+        const citySelect = document.getElementById('city');
+        const dateInput = document.getElementById('date');
+        citySelect.addEventListener('change', function() {
+            dateInput.value = '';
+            dateInput.setAttribute('required', 'required');
+        });
+    </script>
+</body>
+</html>
