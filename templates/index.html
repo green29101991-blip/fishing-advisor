@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>🎣 Рыбацкий помощник</title>
     
-    <!-- PWA: встроенная иконка -->
+    <!-- PWA -->
     <link rel="icon" href="image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎣</text></svg>">
     <link rel="manifest" href="/static/manifest.json">
     <meta name="theme-color" content="#0ea5e9">
@@ -14,11 +14,7 @@
     <link rel="apple-touch-icon" href="image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 192 192%22><text y=%22.9em%22 font-size=%22160%22>🎣</text></svg>">
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: #f8fafc;
@@ -31,7 +27,7 @@
             margin: 0 auto;
             background: white;
             border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
             overflow: hidden;
         }
         header {
@@ -40,23 +36,15 @@
             padding: 24px;
             text-align: center;
         }
-        header h1 {
-            font-size: 24px;
-            font-weight: 700;
-        }
-        .form-section {
-            padding: 24px;
-        }
+        header h1 { font-size: 24px; font-weight: 700; }
+        .form-section { padding: 24px; }
         .form-row {
             display: flex;
             flex-wrap: wrap;
             gap: 16px;
             margin-bottom: 20px;
         }
-        .form-group {
-            flex: 1;
-            min-width: 250px;
-        }
+        .form-group { flex: 1; min-width: 250px; }
         label {
             display: block;
             font-size: 14px;
@@ -64,7 +52,7 @@
             margin-bottom: 8px;
             color: #334155;
         }
-        input[type="date"] {
+        input[type="date"], select {
             width: 100%;
             padding: 12px 14px;
             border: 1px solid #cbd5e1;
@@ -73,20 +61,8 @@
             background: white;
             color: #1e293b;
         }
-        input[type="date"]:focus {
-            outline: none;
-            border-color: #0ea5e9;
-            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
-        }
-
         select {
-            width: 100%;
-            padding: 12px 36px 12px 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 10px;
-            font-size: 16px;
-            color: #1e293b;
-            background-color: white;
+            padding-right: 36px;
             -webkit-appearance: none;
             -moz-appearance: none;
             appearance: none;
@@ -95,15 +71,11 @@
             background-position: right 10px center;
             background-size: 14px;
         }
-        select:focus {
+        input[type="date"]:focus, select:focus {
             outline: none;
             border-color: #0ea5e9;
-            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+            box-shadow: 0 0 0 3px rgba(14,165,233,0.2);
         }
-        select::-ms-expand {
-            display: none;
-        }
-
         button {
             width: 100%;
             padding: 14px;
@@ -116,13 +88,9 @@
             cursor: pointer;
             transition: background 0.2s;
         }
-        button:hover {
-            background: #0284c7;
-        }
+        button:hover { background: #0284c7; }
 
-        .result-section {
-            padding: 0 24px 24px;
-        }
+        .result-section { padding: 0 24px 24px; }
         .location {
             text-align: center;
             margin-bottom: 24px;
@@ -151,13 +119,8 @@
             padding: 6px 0;
             font-size: 15px;
         }
-        .summary-label {
-            color: #475569;
-        }
-        .summary-value {
-            font-weight: 600;
-            color: #0f172a;
-        }
+        .summary-label { color: #475569; }
+        .summary-value { font-weight: 600; color: #0f172a; }
         .advice {
             margin-top: 16px;
             padding-top: 16px;
@@ -166,7 +129,6 @@
             font-weight: 700;
             font-size: 17px;
         }
-
         .toggle-btn {
             width: 100%;
             padding: 12px;
@@ -178,10 +140,7 @@
             cursor: pointer;
             margin-bottom: 20px;
         }
-        .toggle-btn:hover {
-            background: #bfdbfe;
-        }
-
+        .toggle-btn:hover { background: #bfdbfe; }
         .period {
             background: white;
             border: 1px solid #e2e8f0;
@@ -190,9 +149,7 @@
             margin-bottom: 16px;
             display: none;
         }
-        .period.visible {
-            display: block;
-        }
+        .period.visible { display: block; }
         .period-title {
             font-size: 17px;
             font-weight: 700;
@@ -204,9 +161,7 @@
             grid-template-columns: repeat(2, 1fr);
             gap: 12px;
         }
-        .period-item {
-            font-size: 14px;
-        }
+        .period-item { font-size: 14px; }
         .period-label {
             color: #64748b;
             display: block;
@@ -223,15 +178,9 @@
             text-align: center;
             font-weight: 600;
         }
-
         @media (max-width: 600px) {
-            .form-row {
-                flex-direction: column;
-                gap: 16px;
-            }
-            .period-grid {
-                grid-template-columns: 1fr;
-            }
+            .form-row { flex-direction: column; gap: 16px; }
+            .period-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -261,7 +210,7 @@
                     </div>
                     <div class="form-group">
                         <label for="date">📅 Дата</label>
-                        <input type="date" id="date" name="date" value="{{ date }}" required>
+                        <input type="date" id="date" name="date" value="{{ date }}" min="{{ today }}" max="{{ max_date }}" required>
                     </div>
                 </div>
                 <button type="submit">Получить совет</button>
@@ -397,7 +346,6 @@
             });
         }
 
-        // Сброс даты при смене города
         const citySelect = document.getElementById('city');
         const dateInput = document.getElementById('date');
         citySelect.addEventListener('change', function() {

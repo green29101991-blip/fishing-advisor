@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from datetime import datetime
+from datetime import datetime, timedelta
 import requests
 import ephem
 
@@ -11,7 +11,7 @@ app.mount("/static", StaticFiles(directory="templates"), name="static")
 
 WEATHER_API_KEY = "e452f467896c49b4912130415252909"
 
-def get_weather(city: str = "Moscow", days: int = 1):
+def get_weather(city: str = "Moscow", days: int = 14):
     url = f"http://api.weatherapi.com/v1/forecast.json?key={WEATHER_API_KEY}&q={city}&days={days}&lang=ru"
     response = requests.get(url)
     if response.status_code != 200:
@@ -42,7 +42,7 @@ def get_advice_text(score: int):
     else:
         return "🚫 Плохой клёв. Лучше остаться дома."
 
-def generate_daily_advice(weather_data: dict, date: str):
+def generate_daily_advice(weather_data, date: str):
     moon_phase = get_moon_phase(date)
 
     periods = {
@@ -52,7 +52,18 @@ def generate_daily_advice(weather_data: dict, date: str):
         "night": {"hours": list(range(0, 6)), "name": "🌙 Ночь (0:00–6:00)", "data": []}
     }
 
-    for hour_data in weather_data["forecast"]["forecastday"][0]["hour"]:
+    # Находим нужный день в прогнозе
+    target_day = None
+    for day in weather_data["forecast"]["forecastday"]:
+        if day["date"] == date:
+            target_day = day
+            break
+
+    if not target_day:
+        # Если дата вне прогноза — берём первый день
+        target_day = weather_data["forecast"]["forecastday"][0]
+
+    for hour_data in target_day["hour"]:
         hour = int(hour_data["time"].split()[1].split(":")[0])
         for period in periods.values():
             if hour in period["hours"]:
@@ -75,7 +86,7 @@ def generate_daily_advice(weather_data: dict, date: str):
         total_rain = sum(rains)
         avg_humidity = sum(humidities) / len(humidities)
         avg_pressure_hpa = sum(pressures_hpa) / len(pressures_hpa)
-        avg_pressure_mmhg = avg_pressure_hpa * 0.750062  # ← КОНВЕРТАЦИЯ
+        avg_pressure_mmhg = avg_pressure_hpa * 0.750062
 
         score = 0
         if moon_phase in ["🌒 Растущая Луна", "🌕 Полнолуние"]:
@@ -103,7 +114,6 @@ def generate_daily_advice(weather_data: dict, date: str):
         if 40 <= avg_humidity <= 70:
             score += 1
 
-        # ДАВЛЕНИЕ в мм рт. ст.
         if 750 <= avg_pressure_mmhg <= 770:
             score += 2
         elif 740 <= avg_pressure_mmhg < 750 or 770 < avg_pressure_mmhg <= 780:
@@ -118,8 +128,8 @@ def generate_daily_advice(weather_data: dict, date: str):
             "wind": f"{avg_wind:.1f} м/с",
             "rain": f"{total_rain:.1f} мм",
             "humidity": f"{avg_humidity:.0f}%",
-            "pressure_value": avg_pressure_mmhg,  # ← ЧИСЛО
-            "pressure": f"{avg_pressure_mmhg:.0f} мм рт. ст.",  # ← СТРОКА
+            "pressure_value": avg_pressure_mmhg,
+            "pressure": f"{avg_pressure_mmhg:.0f} мм рт. ст.",
             "score": score,
             "advice": get_advice_text(score)
         })
@@ -128,11 +138,26 @@ def generate_daily_advice(weather_data: dict, date: str):
 
 @app.get("/")
 def read_root(request: Request, date: str = None, city: str = "Moscow"):
+    today = datetime.now().date()
+    max_date = today + timedelta(days=14)
+    today_str = today.strftime("%Y-%m-%d")
+    max_date_str = max_date.strftime("%Y-%m-%d")
+
     if not date:
-        date = datetime.now().strftime("%Y-%m-%d")
-    
+        date = today_str
+    else:
+        # Убедимся, что дата в допустимом диапазоне
+        try:
+            selected = datetime.strptime(date, "%Y-%m-%d").date()
+            if selected > max_date:
+                date = max_date_str
+            elif selected < today:
+                date = today_str
+        except:
+            date = today_str
+
     try:
-        weather = get_weather(city=city, days=1)
+        weather = get_weather(city=city, days=14)
         advice_blocks = generate_daily_advice(weather, date)
         avg_score = sum(block["score"] for block in advice_blocks) / len(advice_blocks)
         summary_advice = get_advice_text(int(avg_score))
@@ -145,7 +170,9 @@ def read_root(request: Request, date: str = None, city: str = "Moscow"):
                 "date": date,
                 "city": city,
                 "avg_score": avg_score,
-                "summary_advice": summary_advice
+                "summary_advice": summary_advice,
+                "today": today_str,
+                "max_date": max_date_str,
             }
         )
     except Exception as e:
