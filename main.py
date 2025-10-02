@@ -42,7 +42,7 @@ def get_advice_text(score: int):
     else:
         return "🚫 Плохой клёв. Лучше остаться дома."
 
-def generate_daily_advice(weather_ dict, date: str):
+def generate_daily_advice(weather_data: dict, date: str):
     moon_phase = get_moon_phase(date)
 
     periods = {
