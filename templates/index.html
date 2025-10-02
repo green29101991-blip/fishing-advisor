@@ -6,12 +6,12 @@
     <title>🎣 Рыбацкий помощник</title>
     
     <!-- PWA: встроенная иконка -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎣</text></svg>">
+    <link rel="icon" href="image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎣</text></svg>">
     <link rel="manifest" href="/static/manifest.json">
     <meta name="theme-color" content="#0ea5e9">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 192 192%22><text y=%22.9em%22 font-size=%22160%22>🎣</text></svg>">
+    <link rel="apple-touch-icon" href="image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 192 192%22><text y=%22.9em%22 font-size=%22160%22>🎣</text></svg>">
 
     <style>
         * {
@@ -323,6 +323,15 @@
                     <span class="summary-value">~{{ total_rain.value|round(1) }} мм</span>
                 </div>
 
+                {% set total_pressure = namespace(value=0) %}
+                {% for block in advice_blocks %}
+                    {% set total_pressure.value = total_pressure.value + block.pressure.replace(' гПа', '')|float %}
+                {% endfor %}
+                <div class="summary-row">
+                    <span class="summary-label">🔽 Давление</span>
+                    <span class="summary-value">~{{ (total_pressure.value / advice_blocks|length)|round(0) }} гПа</span>
+                </div>
+
                 <div class="summary-row">
                     <span class="summary-label">📊 Средняя оценка клёва</span>
                     <span class="summary-value">{{ avg_score|round(1) }}/10</span>
@@ -358,6 +367,10 @@
                     <div class="period-item">
                         <span class="period-label">Влажность</span>
                         <span class="period-value">{{ block.humidity }}</span>
+                    </div>
+                    <div class="period-item">
+                        <span class="period-label">Давление</span>
+                        <span class="period-value">{{ block.pressure }}</span>
                     </div>
                 </div>
                 <div class="period-advice" style="color: {% if block.score >= 9 %}#059669{% elif block.score >= 7 %}#059669{% elif block.score >= 5 %}#2563eb{% elif block.score >= 3 %}#d97706{% else %}#dc2626{% endif %};">

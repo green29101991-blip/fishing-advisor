@@ -6,14 +6,9 @@ import requests
 import ephem
 
 app = FastAPI()
-
-# Подключаем папку templates для Jinja2
 templates = Jinja2Templates(directory="templates")
-
-# Раздача статики (для manifest.json и иконок)
 app.mount("/static", StaticFiles(directory="templates"), name="static")
 
-# Твой API-ключ от WeatherAPI
 WEATHER_API_KEY = "e452f467896c49b4912130415252909"
 
 def get_weather(city: str = "Moscow", days: int = 1):
@@ -73,13 +68,16 @@ def generate_daily_advice(weather_data: dict, date: str):
         winds = [h["wind_kph"] / 3.6 for h in period["data"]]
         rains = [h["precip_mm"] for h in period["data"]]
         humidities = [h["humidity"] for h in period["data"]]
+        pressures = [h["pressure_mb"] for h in period["data"]]  # ← ДАВЛЕНИЕ
 
         avg_temp = sum(temps) / len(temps)
         avg_wind = sum(winds) / len(winds)
         total_rain = sum(rains)
         avg_humidity = sum(humidities) / len(humidities)
+        avg_pressure = sum(pressures) / len(pressures)  # ← СРЕДНЕЕ ДАВЛЕНИЕ
 
         score = 0
+        # Луна
         if moon_phase in ["🌒 Растущая Луна", "🌕 Полнолуние"]:
             score += 3
         elif moon_phase == "🌑 Новолуние":
@@ -87,22 +85,32 @@ def generate_daily_advice(weather_data: dict, date: str):
         else:
             score += 1
 
+        # Температура
         if 15 <= avg_temp <= 25:
             score += 2
         elif 10 <= avg_temp < 15 or 25 < avg_temp <= 30:
             score += 1
 
+        # Ветер
         if avg_wind <= 3:
             score += 2
         elif 3 < avg_wind <= 5:
             score += 1
 
+        # Осадки
         if total_rain == 0:
             score += 2
         elif total_rain < 2:
             score += 1
 
+        # Влажность
         if 40 <= avg_humidity <= 70:
+            score += 1
+
+        # ДАВЛЕНИЕ ← НОВОЕ
+        if 1000 <= avg_pressure <= 1027:
+            score += 2
+        elif 990 <= avg_pressure < 1000 or 1027 < avg_pressure <= 1040:
             score += 1
 
         score = min(max(int(score), 0), 10)
@@ -114,6 +122,7 @@ def generate_daily_advice(weather_data: dict, date: str):
             "wind": f"{avg_wind:.1f} м/с",
             "rain": f"{total_rain:.1f} мм",
             "humidity": f"{avg_humidity:.0f}%",
+            "pressure": f"{avg_pressure:.0f} гПа",  # ← ДОБАВЛЕНО
             "score": score,
             "advice": get_advice_text(score)
         })
