@@ -118,7 +118,8 @@ def generate_daily_advice(weather_data: dict, date: str):
             "wind": f"{avg_wind:.1f} м/с",
             "rain": f"{total_rain:.1f} мм",
             "humidity": f"{avg_humidity:.0f}%",
-            "pressure": f"{avg_pressure_mmhg:.0f} мм рт. ст.",  # ← ФОРМАТ ИЗМЕНЁН
+            "pressure_value": avg_pressure_mmhg,  # ← ЧИСЛО
+            "pressure": f"{avg_pressure_mmhg:.0f} мм рт. ст.",  # ← СТРОКА
             "score": score,
             "advice": get_advice_text(score)
         })
