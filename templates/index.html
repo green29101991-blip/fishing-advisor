@@ -325,11 +325,11 @@
 
                 {% set total_pressure = namespace(value=0) %}
                 {% for block in advice_blocks %}
-                    {% set total_pressure.value = total_pressure.value + block.pressure.replace(' гПа', '')|float %}
+                    {% set total_pressure.value = total_pressure.value + block.pressure_value %}
                 {% endfor %}
                 <div class="summary-row">
                     <span class="summary-label">🔽 Давление</span>
-                    <span class="summary-value">~{{ (total_pressure.value / advice_blocks|length)|round(0) }} гПа</span>
+                    <span class="summary-value">~{{ (total_pressure.value / advice_blocks|length)|round(0) }} мм рт. ст.</span>
                 </div>
 
                 <div class="summary-row">
