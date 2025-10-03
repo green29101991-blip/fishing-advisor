@@ -178,6 +178,19 @@
             text-align: center;
             font-weight: 600;
         }
+        #shareBtn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        #shareBtn:hover {
+            background: #45a049;
+        }
         @media (max-width: 600px) {
             .form-row { flex-direction: column; gap: 16px; }
             .period-grid { grid-template-columns: 1fr; }
@@ -386,6 +399,36 @@
                 </div>
             </div>
             {% endfor %}
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button id="shareBtn">📤 Поделиться прогнозом</button>
+            </div>
+
+            <script>
+            document.getElementById('shareBtn').addEventListener('click', async () => {
+                const url = window.location.href;
+                const title = `🎣 Прогноз клёва на {{ date }} в {{ city }}`;
+
+                if (navigator.share) {
+                    try {
+                        await navigator.share({ title, url });
+                        return;
+                    } catch (e) {
+                        console.log("Web Share отменён или не поддерживается");
+                    }
+                }
+
+                navigator.clipboard.writeText(url).then(() => {
+                    const btn = document.getElementById('shareBtn');
+                    btn.textContent = '✅ Ссылка скопирована!';
+                    btn.style.background = '#4CAF50';
+                    setTimeout(() => {
+                        btn.textContent = '📤 Поделиться прогнозом';
+                        btn.style.background = '#4CAF50';
+                    }, 2000);
+                });
+            });
+            </script>
             {% endif %}
         </div>
         {% endif %}
