@@ -11,6 +11,13 @@ app.mount("/static", StaticFiles(directory="templates"), name="static")
 
 WEATHER_API_KEY = "e452f467896c49b4912130415252909"
 
+def degrees_to_direction(deg):
+    if deg is None:
+        return "–"
+    directions = ["С", "СВ", "В", "ЮВ", "Ю", "ЮЗ", "З", "СЗ"]
+    index = round(deg / 45) % 8
+    return directions[index]
+
 def get_weather(city: str = "Moscow", days: int = 14):
     url = f"http://api.weatherapi.com/v1/forecast.json?key={WEATHER_API_KEY}&q={city}&days={days}&lang=ru"
     response = requests.get(url)
@@ -52,7 +59,6 @@ def generate_daily_advice(weather_data, date: str):
         "night": {"hours": list(range(0, 6)), "name": "🌙 Ночь (0:00–6:00)", "data": []}
     }
 
-    # Находим нужный день в прогнозе
     target_day = None
     for day in weather_data["forecast"]["forecastday"]:
         if day["date"] == date:
@@ -60,7 +66,6 @@ def generate_daily_advice(weather_data, date: str):
             break
 
     if not target_day:
-        # Если дата вне прогноза — берём первый день
         target_day = weather_data["forecast"]["forecastday"][0]
 
     for hour_data in target_day["hour"]:
@@ -77,18 +82,21 @@ def generate_daily_advice(weather_data, date: str):
 
         temps = [h["temp_c"] for h in period["data"]]
         winds = [h["wind_kph"] / 3.6 for h in period["data"]]
+        wind_dirs = [h["wind_degree"] for h in period["data"]]
         rains = [h["precip_mm"] for h in period["data"]]
         humidities = [h["humidity"] for h in period["data"]]
         pressures_hpa = [h["pressure_mb"] for h in period["data"]]
 
         avg_temp = sum(temps) / len(temps)
         avg_wind = sum(winds) / len(winds)
+        avg_wind_dir = degrees_to_direction(sum(wind_dirs) / len(wind_dirs))
         total_rain = sum(rains)
         avg_humidity = sum(humidities) / len(humidities)
         avg_pressure_hpa = sum(pressures_hpa) / len(pressures_hpa)
         avg_pressure_mmhg = avg_pressure_hpa * 0.750062
 
         score = 0
+        # Луна
         if moon_phase in ["🌒 Растущая Луна", "🌕 Полнолуние"]:
             score += 3
         elif moon_phase == "🌑 Новолуние":
@@ -96,24 +104,33 @@ def generate_daily_advice(weather_data, date: str):
         else:
             score += 1
 
+        # Температура
         if 15 <= avg_temp <= 25:
             score += 2
         elif 10 <= avg_temp < 15 or 25 < avg_temp <= 30:
             score += 1
 
+        # Ветер: скорость
         if avg_wind <= 3:
             score += 2
         elif 3 < avg_wind <= 5:
             score += 1
 
+        # Ветер: направление ← НОВОЕ
+        if avg_wind_dir in ["Ю", "ЮЗ", "З"]:
+            score += 1
+
+        # Осадки
         if total_rain == 0:
             score += 2
         elif total_rain < 2:
             score += 1
 
+        # Влажность
         if 40 <= avg_humidity <= 70:
             score += 1
 
+        # Давление
         if 750 <= avg_pressure_mmhg <= 770:
             score += 2
         elif 740 <= avg_pressure_mmhg < 750 or 770 < avg_pressure_mmhg <= 780:
@@ -126,6 +143,7 @@ def generate_daily_advice(weather_data, date: str):
             "moon_phase": moon_phase,
             "temp": f"{avg_temp:.1f}°C",
             "wind": f"{avg_wind:.1f} м/с",
+            "wind_direction": avg_wind_dir,
             "rain": f"{total_rain:.1f} мм",
             "humidity": f"{avg_humidity:.0f}%",
             "pressure_value": avg_pressure_mmhg,
@@ -146,7 +164,6 @@ def read_root(request: Request, date: str = None, city: str = "Moscow"):
     if not date:
         date = today_str
     else:
-        # Убедимся, что дата в допустимом диапазоне
         try:
             selected = datetime.strptime(date, "%Y-%m-%d").date()
             if selected > max_date:

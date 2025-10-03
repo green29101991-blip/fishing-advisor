@@ -260,7 +260,7 @@
                 {% endfor %}
                 <div class="summary-row">
                     <span class="summary-label">💨 Ветер</span>
-                    <span class="summary-value">~{{ (total_wind.value / advice_blocks|length)|round(1) }} м/с</span>
+                    <span class="summary-value">~{{ (total_wind.value / advice_blocks|length)|round(1) }} м/с, {{ advice_blocks[0].wind_direction }}</span>
                 </div>
 
                 {% set total_rain = namespace(value=0) %}
@@ -307,7 +307,7 @@
                     </div>
                     <div class="period-item">
                         <span class="period-label">Ветер</span>
-                        <span class="period-value">{{ block.wind }}</span>
+                        <span class="period-value">{{ block.wind }}, {{ block.wind_direction }}</span>
                     </div>
                     <div class="period-item">
                         <span class="period-label">Осадки</span>
