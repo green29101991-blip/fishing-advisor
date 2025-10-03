@@ -272,6 +272,15 @@
                     <span class="summary-value">~{{ total_rain.value|round(1) }} мм</span>
                 </div>
 
+                {% set total_cloud = namespace(value=0) %}
+                {% for block in advice_blocks %}
+                    {% set total_cloud.value = total_cloud.value + block.cloud_pct.replace('%', '')|float %}
+                {% endfor %}
+                <div class="summary-row">
+                    <span class="summary-label">🌤 Облачность</span>
+                    <span class="summary-value">~{{ (total_cloud.value / advice_blocks|length)|round(0) }}%, {{ advice_blocks[0].cloud_icon }}</span>
+                </div>
+
                 {% set total_pressure = namespace(value=0) %}
                 {% for block in advice_blocks %}
                     {% set total_pressure.value = total_pressure.value + block.pressure_value %}
@@ -312,6 +321,10 @@
                     <div class="period-item">
                         <span class="period-label">Осадки</span>
                         <span class="period-value">{{ block.rain }}</span>
+                    </div>
+                    <div class="period-item">
+                        <span class="period-label">Облачность</span>
+                        <span class="period-value">{{ block.cloud_pct }}, {{ block.cloud_icon }}</span>
                     </div>
                     <div class="period-item">
                         <span class="period-label">Влажность</span>

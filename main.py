@@ -11,6 +11,14 @@ app.mount("/static", StaticFiles(directory="templates"), name="static")
 
 WEATHER_API_KEY = "e452f467896c49b4912130415252909"
 
+def cloud_to_icon(cloud_pct):
+    if cloud_pct <= 25:
+        return "☀️ Ясно"
+    elif cloud_pct <= 60:
+        return "⛅ Переменная облачность"
+    else:
+        return "☁️ Пасмурно"
+
 def degrees_to_direction(deg):
     if deg is None:
         return "–", "•"
@@ -94,6 +102,7 @@ def generate_daily_advice(weather_data, date: str):
         wind_dirs = [h["wind_degree"] for h in period["data"]]
         rains = [h["precip_mm"] for h in period["data"]]
         humidities = [h["humidity"] for h in period["data"]]
+        clouds = [h["cloud"] for h in period["data"]]  # ← ОБЛАЧНОСТЬ
         pressures_hpa = [h["pressure_mb"] for h in period["data"]]
 
         avg_temp = sum(temps) / len(temps)
@@ -101,6 +110,8 @@ def generate_daily_advice(weather_data, date: str):
         avg_wind_dir_label, avg_wind_dir_arrow = degrees_to_direction(sum(wind_dirs) / len(wind_dirs))
         total_rain = sum(rains)
         avg_humidity = sum(humidities) / len(humidities)
+        avg_cloud = sum(clouds) / len(clouds)  # ← СРЕДНЯЯ ОБЛАЧНОСТЬ
+        cloud_icon = cloud_to_icon(avg_cloud)  # ← ИКОНКА
         avg_pressure_hpa = sum(pressures_hpa) / len(pressures_hpa)
         avg_pressure_mmhg = avg_pressure_hpa * 0.750062
 
@@ -133,6 +144,10 @@ def generate_daily_advice(weather_data, date: str):
         if 40 <= avg_humidity <= 70:
             score += 1
 
+        # Облачность: пасмурно — +1 для хищников (опционально)
+        if 60 < avg_cloud <= 100:
+            score += 1
+
         if 750 <= avg_pressure_mmhg <= 770:
             score += 2
         elif 740 <= avg_pressure_mmhg < 750 or 770 < avg_pressure_mmhg <= 780:
@@ -149,6 +164,8 @@ def generate_daily_advice(weather_data, date: str):
             "wind_direction_arrow": avg_wind_dir_arrow,
             "rain": f"{total_rain:.1f} мм",
             "humidity": f"{avg_humidity:.0f}%",
+            "cloud_pct": f"{avg_cloud:.0f}%",
+            "cloud_icon": cloud_icon,
             "pressure_value": avg_pressure_mmhg,
             "pressure": f"{avg_pressure_mmhg:.0f} мм рт. ст.",
             "score": score,
