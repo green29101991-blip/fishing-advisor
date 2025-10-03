@@ -102,7 +102,7 @@ def generate_daily_advice(weather_data, date: str):
         wind_dirs = [h["wind_degree"] for h in period["data"]]
         rains = [h["precip_mm"] for h in period["data"]]
         humidities = [h["humidity"] for h in period["data"]]
-        clouds = [h["cloud"] for h in period["data"]]  # ← ОБЛАЧНОСТЬ
+        clouds = [h["cloud"] for h in period["data"]]
         pressures_hpa = [h["pressure_mb"] for h in period["data"]]
 
         avg_temp = sum(temps) / len(temps)
@@ -110,8 +110,8 @@ def generate_daily_advice(weather_data, date: str):
         avg_wind_dir_label, avg_wind_dir_arrow = degrees_to_direction(sum(wind_dirs) / len(wind_dirs))
         total_rain = sum(rains)
         avg_humidity = sum(humidities) / len(humidities)
-        avg_cloud = sum(clouds) / len(clouds)  # ← СРЕДНЯЯ ОБЛАЧНОСТЬ
-        cloud_icon = cloud_to_icon(avg_cloud)  # ← ИКОНКА
+        avg_cloud = sum(clouds) / len(clouds)
+        cloud_icon = cloud_to_icon(avg_cloud)
         avg_pressure_hpa = sum(pressures_hpa) / len(pressures_hpa)
         avg_pressure_mmhg = avg_pressure_hpa * 0.750062
 
@@ -144,7 +144,6 @@ def generate_daily_advice(weather_data, date: str):
         if 40 <= avg_humidity <= 70:
             score += 1
 
-        # Облачность: пасмурно — +1 для хищников (опционально)
         if 60 < avg_cloud <= 100:
             score += 1
 
